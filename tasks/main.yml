@@ -1,0 +1,245 @@
+---
+- name: Include Red Hat Derivatives Tasks
+  include_tasks: redhat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Include Debian Derivatives Tasks
+  include_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Include Arch Derivatives Tasks
+  include_tasks: arch.yml
+  when: ansible_os_family == 'Archlinux'
+
+- name: Make sure we have a 'wheel' group
+  group:
+    name: wheel
+    state: present
+  tags:
+    - shell
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+  tags:
+    - shell
+
+- name: Create groups for users
+  become: true
+  loop: "{{ users }}"
+  group:
+    name: "{{ item.username }}"
+  register: create_groups
+  tags:
+    - shell
+
+- name: Setup Users
+  become: true
+  loop: "{{ users }}"
+  user:
+    name: "{{ item.username }}"
+    group: "{{ item.username }}"
+    groups:
+      - "{{ item.username }}"
+      - wheel
+    append: true
+    shell: /usr/bin/fish
+    home: "{{ item.home_path }}"
+    create_home: true
+  when: create_groups is succeeded
+  register: create_users
+  tags:
+    - shell
+
+- name: Add Debian users to sudoers group
+  become: true
+  loop: "{{ users }}"
+  user:
+    name: "{{ item.username }}"
+    groups:
+      - "{{ item.username }}"
+      - wheel
+      - sudo
+    append: true
+  when: ansible_os_family == 'Debian'
+  tags:
+    - shell
+
+- name: "Create authorized_keys file"
+  become: true
+  authorized_key:
+    user: "{{ item[0].username }}"
+    state: present
+    key: "{{ item[1] }}"
+    exclusive: false
+  with_nested:
+    - "{{ users }}"
+    - "{{ ssh_public_keys }}"
+  tags:
+    - ssh
+    - shell
+
+- name: Create fish configs directory
+  loop: "{{ users }}"
+  become: true
+  file:
+    path: "{{ item.home_path }}/.config/fish"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0744"
+  tags:
+    - fish
+    - shell
+
+- name: Copy Fish Config
+  loop: "{{ users }}"
+  become: true
+  copy:
+    src: config.fish
+    dest: "{{ item.home_path }}/.config/fish/config.fish"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  tags:
+    - fish
+    - shell
+
+- name: Get OMF Installer
+  loop: "{{ users }}"
+  become: true
+  get_url:
+    url: "{{ omf_install_script_url }}"
+    dest: "/tmp/omf_install"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0777"
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Copy OMF installer to each user's home directory
+  become: true
+  loop: "{{ users }}"
+  copy:
+    remote_src: true
+    src: /tmp/omf_install
+    dest: "{{ item.home_path }}/install"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: 0755
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Install OMF
+  loop: "{{ users }}"
+  become: true
+  become_user: "{{ item.username }}"
+  timeout: 30
+  shell: "./install --noninteractive --yes"
+  args:
+    executable: /usr/bin/fish
+    chdir: "{{ item.home_path }}"
+  register: installomf
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Remove OMF installer
+  loop: "{{ users }}"
+  become: true
+  file:
+    path: "{{ item.home_path }}/install"
+    state: absent
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Install BobTheFish
+  loop: "{{ users }}"
+  become: true
+  become_user: "{{ item.username }}"
+  timeout: 30
+  shell: omf install bobthefish
+  args:
+    executable: /usr/bin/fish
+    chdir: "{{ item.home_path }}"
+  when: installomf is succeeded
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Clone Ultimate VIM repo to temporary directory
+  become: true
+  ansible.builtin.git:
+    repo: "{{ ultimate_vim_git_url }}"
+    dest: /tmp/.vim_runtime
+    single_branch: true
+    version: master
+    depth: 1
+  tags:
+    - shell
+    - vim
+
+- name: Copy Ultimate VIM to each user's home directory
+  become: true
+  loop: "{{ users }}"
+  copy:
+    remote_src: true
+    src: /tmp/.vim_runtime
+    dest: "{{ item.home_path }}"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+  tags:
+    - shell
+    - vim
+
+- name: Install Ultimate VIM
+  loop: "{{ users }}"
+  become: true
+  become_user: "{{ item.username }}"
+  timeout: 30
+  shell: sh .vim_runtime/install_awesome_vimrc.sh
+  args:
+    chdir: "{{ item.home_path }}"
+  register: ultimate_vim
+  tags:
+    - shell
+    - vim
+
+- name: Copy VIM my_configs
+  loop: "{{ users }}"
+  become: true
+  copy:
+    src: vim_my_configs.vim
+    dest: "{{ item.home_path }}/.vim_runtime/my_configs.vim"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  when: ultimate_vim is not skipped
+  tags:
+    - vim
+    - shell
+
+- name: Ensure configs dir is owned by user
+  loop: "{{ users }}"
+  become: true
+  file:
+    path: "{{ item.home_path }}/.config"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    recurse: true
+  tags:
+    - fish
+    - omf
+    - shell

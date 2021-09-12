@@ -1,0 +1,83 @@
+---
+- name: Enable EPEL RHEL Derivatives
+  become: true
+  yum_repository:
+    name: epel
+    description: Extra Packages for Enterprise Linux $releasever - $basearch
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/Everything/$basearch
+    metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir
+    enabled: true
+    gpgcheck: true
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8
+  when: ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "Rocky" or ansible_facts['distribution'] == "CentOS"
+  tags:
+    - yum
+    - dnf
+
+- name: Enable EPEL Repo Oracle Linux
+  become: true
+  yum_repository:
+    name: ol8_developer_EPEL
+    description: Oracle Linux $releasever EPEL Packages for Development ($basearch)
+    baseurl: https://yum$ociregion.$ocidomain/repo/OracleLinux/OL8/developer/EPEL/$basearch/
+    enabled: true
+    gpgcheck: true
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+  when: ansible_facts['distribution'] == "OracleLinux"
+  tags:
+    - yum
+    - dnf
+
+- name: Upgrade all packages
+  become: true
+  dnf:
+    name: "*"
+    state: latest
+  tags:
+    - yum
+    - dnf
+
+- name: Install VIM
+  become: true
+  dnf:
+    name: vim
+    state: latest
+  tags:
+    - yum
+    - dnf
+
+- name: Install Git
+  become: true
+  dnf:
+    name: git
+    state: latest
+  tags:
+    - yum
+    - dnf
+
+- name: Install Fish
+  become: true
+  dnf:
+    name: fish
+    state: latest
+  tags:
+    - yum
+    - dnf
+
+- name: Install NeoFetch
+  become: true
+  dnf:
+    name: neofetch
+    state: latest
+  tags:
+    - yum
+    - dnf
+
+- name: Install iSCSI
+  become: true
+  dnf:
+    name: iscsi-initiator-utils
+    state: latest
+  tags:
+    - yum
+    - dnf

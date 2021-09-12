@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: server-setup
+  author: Scott Harwell
+  description: Sets up servers with Fish shell and my commonly used configurations.
+  license: MIT
+  min_ansible_version: 2.1
+
+  platforms:
+    - name: EL
+      versions:
+        - 8
+    - name: Fedora
+      versions:
+        - all
+
+  galaxy_tags:
+    - development
+    - configuration
+    - shell
+
+  dependencies: []

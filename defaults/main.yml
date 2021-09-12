@@ -1,0 +1,16 @@
+---
+# Provide a list of users that will have shells updated and have the public keys deployed to.
+users: []
+#  - username: root
+#    home_path: /root
+
+# Provide local paths to public keys that should be deployed on the remote host
+ssh_public_keys: []
+#  - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"
+#  - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+# Location of the script to install OMF
+omf_install_script_url: "https://get.oh-my.fish"
+
+# Location of the ultimate VIM Git repository
+ultimate_vim_git_url: "https://github.com/amix/vimrc.git"
