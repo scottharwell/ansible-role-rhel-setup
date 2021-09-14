@@ -3,7 +3,7 @@ Server Setup
 
 [![CI](https://github.com/scottharwell/ansible-role-server-setup/workflows/CI/badge.svg)](https://github.com/scottharwell/ansible-role-server-setup/actions?query=workflow%3A+CI)
 
-This is a simple role to configure Linux servers with a base set of packages and shell configurations that I prefer.  It will configure a list of users on the remote Linux servers with Fish shell as the default shell, will display NeoFetch on login, will configure Fish with Oh My Fish and the _Bob the Fish_ theme, and will configure VIM with my preferred configured.
+This is a simple role to configure Linux servers with a base set of packages and shell configuration that I prefer.  It will configure a list of users on the remote Linux servers with Fish shell as the default shell, will display NeoFetch on login, will configure Fish with Oh My Fish and the _Bob the Fish_ theme, and will setup VIM with my preferred configuration.  Currently, it supports RHEL, Debian, and Arch distributions.
 
 Requirements
 ------------
