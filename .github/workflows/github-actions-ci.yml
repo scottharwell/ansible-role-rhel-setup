@@ -1,15 +1,11 @@
 ---
 name: CI
 
-on:
+'on':
   push:
     branches:
       - main
-      - develop
   pull_request:
-    branches:
-      - main
-      - develop
 
 jobs:
   yaml-lint:
