@@ -1,16 +1,26 @@
 ---
 galaxy_info:
-  role_name: server-setup
+  role_name: server_setup
+  namespace: scottharwell
   author: Scott Harwell
-  description: Sets up servers with Fish shell and my commonly used configurations.
+  description: Sets up servers with Fish shell, Fish shell themes, VIM configuration, and a NeoFetch display at login.
   license: MIT
   min_ansible_version: 2.1
 
   platforms:
+    - name: ArchLinux
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
     - name: EL
       versions:
         - 8
     - name: Fedora
+      versions:
+        - all
+    - name: Ubuntu
       versions:
         - all
 
