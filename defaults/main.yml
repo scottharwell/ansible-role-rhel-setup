@@ -1,8 +1,17 @@
 ---
+# Provide a list of groups that should exist on any system.
+groups_to_create: []
+# - wheel
+# - sudo
+
 # Provide a list of users that will have shells updated and have the public keys deployed to.
 users: []
-#  - username: root
-#    home_path: /root
+# - username: scott
+#   home_path: /home/scott
+#   groups:
+#     - wheel
+#     - sudo
+#     - scott
 
 # Provide local paths to public keys that should be deployed on the remote host
 ssh_public_keys: []

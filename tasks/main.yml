@@ -11,10 +11,13 @@
   include_tasks: arch.yml
   when: ansible_os_family == 'Archlinux'
 
-- name: Make sure we have a 'wheel' group
+- name: Create groups
+  become: true
+  loop: "{{ groups_to_create }}"
   group:
-    name: wheel
+    name: "{{ item }}"
     state: present
+  register: create_groups
   tags:
     - shell
 
@@ -25,6 +28,7 @@
     regexp: "^%wheel"
     line: "%wheel ALL=(ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
+  when: create_groups is succeeded
   tags:
     - shell
 
@@ -33,39 +37,23 @@
   loop: "{{ users }}"
   group:
     name: "{{ item.username }}"
-  register: create_groups
+  register: create_user_groups
   tags:
     - shell
 
-- name: Setup Users
+- name: Setup users
   become: true
   loop: "{{ users }}"
   user:
     name: "{{ item.username }}"
     group: "{{ item.username }}"
-    groups:
-      - "{{ item.username }}"
-      - wheel
+    groups: "{{ item.groups }}"
     append: true
     shell: /usr/bin/fish
     home: "{{ item.home_path }}"
     create_home: true
-  when: create_groups is succeeded
+  when: create_groups is succeeded and create_user_groups is succeeded
   register: create_users
-  tags:
-    - shell
-
-- name: Add Debian users to sudoers group
-  become: true
-  loop: "{{ users }}"
-  user:
-    name: "{{ item.username }}"
-    groups:
-      - "{{ item.username }}"
-      - wheel
-      - sudo
-    append: true
-  when: ansible_os_family == 'Debian'
   tags:
     - shell
 
@@ -83,7 +71,7 @@
     - ssh
     - shell
 
-- name: Create fish configs directory
+- name: Create Fish shell configs directory
   loop: "{{ users }}"
   become: true
   file:
@@ -96,7 +84,7 @@
     - fish
     - shell
 
-- name: Copy Fish Config
+- name: Copy Fish shell config
   loop: "{{ users }}"
   become: true
   copy:
@@ -109,7 +97,7 @@
     - fish
     - shell
 
-- name: Get OMF Installer
+- name: Get OMF installer
   loop: "{{ users }}"
   become: true
   get_url:
@@ -156,6 +144,7 @@
     - fish
     - omf
     - shell
+    - skip_ansible_lint  # This needs to be run in the user's shell
 
 - name: Remove OMF installer
   loop: "{{ users }}"
@@ -182,6 +171,7 @@
     - fish
     - omf
     - shell
+    - skip_ansible_lint  # This needs to be run in the user's shell
 
 - name: Clone Ultimate VIM repo to temporary directory
   become: true
@@ -205,7 +195,7 @@
     dest: "{{ item.home_path }}"
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
-    mode: 0644
+    mode: 0755
   when: clone_ultimate_vim is succeeded
   tags:
     - shell
@@ -216,7 +206,7 @@
   become: true
   become_user: "{{ item.username }}"
   timeout: 30
-  command: "sh .vim_runtime/install_awesome_vimrc.sh"
+  shell: "sh .vim_runtime/install_awesome_vimrc.sh"
   args:
     chdir: "{{ item.home_path }}"
   register: ultimate_vim
@@ -224,6 +214,7 @@
   tags:
     - shell
     - vim
+    - skip_ansible_lint  # This needs to be run in the user's shell
 
 - name: Copy VIM my_configs
   loop: "{{ users }}"
