@@ -134,7 +134,7 @@
   become: true
   become_user: "{{ item.username }}"
   timeout: 30
-  shell: "./install --noninteractive --yes"
+  command: "./install --noninteractive --yes"
   args:
     executable: /usr/bin/fish
     chdir: "{{ item.home_path }}"
