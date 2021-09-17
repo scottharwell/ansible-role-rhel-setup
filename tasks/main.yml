@@ -162,7 +162,7 @@
   become: true
   become_user: "{{ item.username }}"
   timeout: 30
-  command: omf install bobthefish
+  shell: omf install bobthefish
   args:
     executable: /usr/bin/fish
     chdir: "{{ item.home_path }}"
