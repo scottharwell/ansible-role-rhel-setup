@@ -21,5 +21,8 @@ ssh_public_keys: []
 # Location of the script to install OMF
 omf_install_script_url: "https://get.oh-my.fish"
 
-# Location of the ultimate VIM Git repository
+# Location of the Ultimate VIM Git repository
 ultimate_vim_git_url: "https://github.com/amix/vimrc.git"
+
+# Local path to clone Ultimate VIM repo
+ultimate_vim_tmp_path: "/tmp/.vim_runtime"
