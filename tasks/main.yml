@@ -173,14 +173,21 @@
     - shell
     - skip_ansible_lint  # This needs to be run in the user's shell
 
+- name: Check Ultimate VIM repo existence in tmp
+  become: true
+  stat:
+    path: "{{ ultimate_vim_tmp_path }}"
+  register: ultimate_vim_dir_exists
+
 - name: Clone Ultimate VIM repo to temporary directory
   become: true
   ansible.builtin.git:
     repo: "{{ ultimate_vim_git_url }}"
-    dest: /tmp/.vim_runtime
+    dest: "{{ ultimate_vim_tmp_path }}"
     single_branch: true
     version: master
     depth: 1
+  when : ultimate_vim_dir_exists is false
   register: clone_ultimate_vim
   tags:
     - shell
@@ -191,7 +198,7 @@
   loop: "{{ users }}"
   copy:
     remote_src: true
-    src: /tmp/.vim_runtime
+    src: "{{ ultimate_vim_tmp_path }}"
     dest: "{{ item.home_path }}"
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
