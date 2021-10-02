@@ -8,7 +8,9 @@ This is a simple role to configure Linux servers with a base set of packages and
 Requirements
 ------------
 
-Ansible >= 2.0
+Ansible >= 2.9
+
+Run `ansible-galaxy install -r requirements.yml` to ensure that Ansible has dependencies for this role installed.
 
 Role Variables
 --------------
@@ -46,7 +48,8 @@ Role Variables
 Dependencies
 ------------
 
-N/A
+* Ansible Collections
+  * `community.general`
 
 Example Playbook
 ----------------
