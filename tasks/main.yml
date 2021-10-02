@@ -33,9 +33,18 @@
   become: true
   loop: "{{ users }}"
   group:
-    name: "{{ item.username }}"
+    name: "{{ item.name }}"
   register: create_user_groups
   tags:
+    - users
+    - groups
+
+- name: Get all groups
+  getent:
+    database: group
+    split: ":"
+  tags:
+    - users
     - groups
 
 - name: Get path for Fish Shell
@@ -43,15 +52,7 @@
   register: fish_path
   changed_when: 0
   tags:
-    - shell
-    - fish
-    - which
-
-- name: Print the output of `Get path for Fish Shell`
-  ansible.builtin.debug:
-    msg: "{{ fish_path.stdout }}"
-  when: fish_path is defined
-  tags:
+    - users
     - shell
     - fish
     - which
@@ -60,22 +61,43 @@
   become: true
   loop: "{{ users }}"
   user:
-    name: "{{ item.username }}"
-    group: "{{ item.username }}"
-    groups: "{{ item.groups }}"
-    append: true
+    name: "{{ item.name }}"
+    group: "{{ item.name }}"
     shell: "{{ fish_path.stdout }}"
-    #home: "{{ item.home_path }}"
     create_home: true
   register: create_users
+  when: fish_path is succeeded
   tags:
     - users
     - groups
     - shell
 
-# - name: Show created users
-#   debug:
-#     var: create_users
+- name: Add additional groups to user
+  become: true
+  loop: "{{ users }}"
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups }}"
+    append: yes
+  when: item.groups is defined and create_users is succeeded
+  tags:
+    - users
+    - groups
+
+- name: Add administrative groups to user
+  become: true
+  user:
+    name: "{{ item[0].name }}"
+    groups: "{{ item[1] }}"
+    append: yes
+  when: item[0].admin and item[1] in ansible_facts.getent_group
+  register: became_admin
+  with_nested:
+    - "{{ users }}"
+    - "{{ admin_groups }}"
+  tags:
+    - users
+    - groups
 
 - name: "Create authorized_keys file"
   become: true
@@ -199,10 +221,6 @@
     path: "{{ ultimate_vim_tmp_path }}"
   register: ultimate_vim_dir_exists
 
-- name: Print return information from the previous task
-  ansible.builtin.debug:
-    var: ultimate_vim_dir_exists
-
 - name: Clone Ultimate VIM repo to temporary directory
   become: true
   ansible.builtin.git:
@@ -216,10 +234,6 @@
   tags:
     - shell
     - vim
-
-- name: Print return information from the previous task
-  ansible.builtin.debug:
-    var: clone_ultimate_vim
 
 - name: Copy Ultimate VIM to each user's home directory
   become: true

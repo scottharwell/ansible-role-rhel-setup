@@ -6,12 +6,16 @@ groups_to_create: []
 
 # Provide a list of users that will have shells updated and have the public keys deployed to.
 users: []
-# - username: scott
-#   home_path: /home/scott
+# - name: scott
+#   home: /home/scott
+#   admin: true
 #   groups:
-#     - wheel
-#     - sudo
-#     - scott
+#     - some_group
+
+# Administrative user groups
+admin_groups:
+  - sudo
+  - wheel
 
 # Allows `wheel` and `sudo` groups to have passwordless sudo permissions
 passwordless_admin: false

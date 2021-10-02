@@ -18,18 +18,17 @@ Role Variables
 * `groups_to_create`: A list of groups that should exist on the remote servers.
   ```yaml
   groups_to_create:
-    - wheel
-    - sudo
+    - www
   ```
 * `users`: A list of users on the remote server to create or update. This is typically the default user to login to the server and ultimately the `scott` account that I configure for myself.
   ```yaml
   users:
-    - username: scott
-    home_path: /home/scott
-    groups:
-      - sudo
-      - wheel
+    - name: scott
+      admin: true # add to wheel or sudo
+      groups:
+        - some_group
   ```
+* `passwordless_sudo`: Enables passwordless privilege escalation to the `wheel` or `sudo` groups.
 * `ssh_public_keys`: A list of SSH public keys that I want to deploy to the user accounts.  These are local files copied to the remote server
   ```yaml
   ssh_public_keys:
@@ -69,12 +68,12 @@ Example playbook that configures my home VMs configured through Vagrant.
       - wheel
       - sudo
     users:
-      - username: vagrant
+      - name: vagrant
         home_path: /home/vagrant
         groups:
           - wheel
           - sudo
-      - username: scott
+      - name: scott
         home_path: /home/scott
         groups:
           - wheel
