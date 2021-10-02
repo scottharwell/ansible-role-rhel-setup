@@ -5,7 +5,7 @@ galaxy_info:
   author: Scott Harwell
   description: Sets up servers with Fish shell, Fish shell themes, VIM configuration, and a NeoFetch display at login.
   license: MIT
-  min_ansible_version: 2.8
+  min_ansible_version: 2.9
 
   platforms:
     - name: ArchLinux
@@ -37,4 +37,5 @@ galaxy_info:
     - configuration
     - shell
 
-  dependencies: []
+  dependencies:
+    - community.general
