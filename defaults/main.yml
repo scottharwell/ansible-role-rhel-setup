@@ -1,13 +1,11 @@
 ---
 # Provide a list of groups that should exist on any system.
 groups_to_create: []
-# - wheel
-# - sudo
+# - some_group
 
 # Provide a list of users that will have shells updated and have the public keys deployed to.
 users: []
 # - name: scott
-#   home: /home/scott
 #   admin: true
 #   groups:
 #     - some_group

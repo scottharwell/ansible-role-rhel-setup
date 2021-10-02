@@ -3,7 +3,7 @@ Server Setup
 
 [![CI](https://github.com/scottharwell/ansible-role-server-setup/workflows/CI/badge.svg)](https://github.com/scottharwell/ansible-role-server-setup/actions?query=workflow%3A+CI)
 
-This is a simple role to configure Linux servers with a base set of packages and shell configuration that I prefer.  It will configure a list of users on the remote Linux servers with Fish shell as the default shell, will display NeoFetch on login, will configure Fish with Oh My Fish and the _Bob the Fish_ theme, and will setup VIM with my preferred configuration.  Currently, it supports RHEL, Debian, and Arch distributions.
+This is a simple role to configure Linux servers with a base set of packages and shell configuration that I prefer.  It will configure a list of users on the remote Linux servers with Fish shell as the default shell, will display NeoFetch on login, will configure Fish with Oh My Fish and the _Bob the Fish_ theme, and will setup VIM with my preferred configuration.  Currently, it supports RHEL, Debian, and Arch Linux distributions and FreeBSD.
 
 Requirements
 ------------
@@ -29,7 +29,7 @@ Role Variables
         - some_group
   ```
 * `passwordless_sudo`: Enables passwordless privilege escalation to the `wheel` or `sudo` groups.
-* `ssh_public_keys`: A list of SSH public keys that I want to deploy to the user accounts.  These are local files copied to the remote server
+* `ssh_public_keys`: A list of SSH public keys that will be added to the `authorized_keys` file for all of the users added.  These are local files copied to the remote server.
   ```yaml
   ssh_public_keys:
     - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"
@@ -65,19 +65,14 @@ Example playbook that configures my home VMs configured through Vagrant.
       - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"
       - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
     groups_to_create:
-      - wheel
-      - sudo
+      - some_group
     users:
       - name: vagrant
-        home_path: /home/vagrant
+        admin: true
         groups:
-          - wheel
-          - sudo
+          - some_group
       - name: scott
-        home_path: /home/scott
-        groups:
-          - wheel
-          - sudo
+        admin: false
 
   roles:
     - role: ~/Programming/Ansible/roles/server-setup

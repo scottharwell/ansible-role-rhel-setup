@@ -79,7 +79,7 @@
     name: "{{ item.name }}"
     groups: "{{ item.groups }}"
     append: true
-  when: item.groups is defined and create_users is succeeded
+  when: item.groups is defined and (item.groups|length>0)
   tags:
     - users
     - groups
@@ -90,7 +90,7 @@
     name: "{{ item[0].name }}"
     groups: "{{ item[1] }}"
     append: true
-  when: item[0].admin and item[1] in ansible_facts.getent_group
+  when: item[0].admin is defined and item[0].admin and item[1] in ansible_facts.getent_group
   register: became_admin
   with_nested:
     - "{{ users }}"
