@@ -8,7 +8,7 @@
     - pkg
     - bsd
 
-- name: Install VIM
+- name: Install packages
   become: true
   community.general.pkgng:
     name: vim, git, fish, neofetch
@@ -18,8 +18,9 @@
     - bsd
 
 - name: Allow 'wheel' group to have passwordless sudo
+  become: true
   lineinfile:
-    dest: /etc/sudoers
+    dest: /usr/local/etc/sudoers
     state: present
     regexp: "^%wheel"
     line: "%wheel ALL=(ALL) NOPASSWD: ALL"
