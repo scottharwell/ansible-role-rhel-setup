@@ -13,6 +13,9 @@ users: []
 #     - sudo
 #     - scott
 
+# Allows `wheel` and `sudo` groups to have passwordless sudo permissions
+passwordless_admin: false
+
 # Provide local paths to public keys that should be deployed on the remote host
 ssh_public_keys: []
 #  - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"

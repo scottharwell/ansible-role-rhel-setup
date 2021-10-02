@@ -11,6 +11,10 @@
   include_tasks: arch.yml
   when: ansible_os_family == 'Archlinux'
 
+- name: Include FreeBSD Derivatives Tasks
+  include_tasks: arch.yml
+  when: ansible_os_family == 'FreeBSD'
+
 - name: Create groups
   become: true
   loop: "{{ groups_to_create }}"
@@ -19,18 +23,7 @@
     state: present
   register: create_groups
   tags:
-    - shell
-
-- name: Allow 'wheel' group to have passwordless sudo
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: "^%wheel"
-    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
-    validate: "visudo -cf %s"
-  when: create_groups is succeeded
-  tags:
-    - shell
+    - groups
 
 - name: Create groups for users
   become: true
@@ -39,7 +32,25 @@
     name: "{{ item.username }}"
   register: create_user_groups
   tags:
+    - groups
+
+- name: Get path for Fish Shell
+  command: which fish
+  register: fish_path
+  changed_when: 0
+  tags:
     - shell
+    - fish
+    - which
+
+- name: Print the output of `Get path for Fish Shell`
+  ansible.builtin.debug:
+    msg: "{{ fish_path.stdout }}"
+  when: fish_path is defined
+  tags:
+    - shell
+    - fish
+    - which
 
 - name: Setup users
   become: true
@@ -49,12 +60,13 @@
     group: "{{ item.username }}"
     groups: "{{ item.groups }}"
     append: true
-    shell: /usr/bin/fish
+    shell: "{{ fish_path.stdout }}"
     home: "{{ item.home_path }}"
     create_home: true
-  when: create_groups is succeeded and create_user_groups is succeeded
   register: create_users
   tags:
+    - users
+    - groups
     - shell
 
 - name: "Create authorized_keys file"

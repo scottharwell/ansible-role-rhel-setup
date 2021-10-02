@@ -1,0 +1,30 @@
+---
+- name: Upgrade all packages
+  become: true
+  community.general.pkgng:
+    name: "*"
+    state: latest
+  tags:
+    - pkg
+    - bsd
+
+- name: Install VIM
+  become: true
+  community.general.pkgng:
+    name: vim, git, fish, neofetch
+    state: latest
+  tags:
+    - pkg
+    - bsd
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+  when: passwordless_admin
+  tags:
+    - groups
+    - bsd
