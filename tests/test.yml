@@ -6,7 +6,7 @@
     ssh_public_keys:
       - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"
     users:
-      - username: scott
+      - name: scott
         home_path: /home/scott
 
   roles:

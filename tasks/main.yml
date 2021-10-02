@@ -1,4 +1,8 @@
 ---
+- name: Print the working os family
+  ansible.builtin.debug:
+    msg: "{{ ansible_os_family }}"
+
 - name: Include Red Hat Derivatives Tasks
   include_tasks: redhat.yml
   when: ansible_os_family == 'RedHat'
@@ -11,6 +15,10 @@
   include_tasks: arch.yml
   when: ansible_os_family == 'Archlinux'
 
+- name: Include FreeBSD Derivatives Tasks
+  include_tasks: bsd.yml
+  when: ansible_os_family == 'FreeBSD'
+
 - name: Create groups
   become: true
   loop: "{{ groups_to_create }}"
@@ -19,92 +27,126 @@
     state: present
   register: create_groups
   tags:
-    - shell
-
-- name: Allow 'wheel' group to have passwordless sudo
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: "^%wheel"
-    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
-    validate: "visudo -cf %s"
-  when: create_groups is succeeded
-  tags:
-    - shell
+    - groups
 
 - name: Create groups for users
   become: true
   loop: "{{ users }}"
   group:
-    name: "{{ item.username }}"
+    name: "{{ item.name }}"
   register: create_user_groups
   tags:
+    - users
+    - groups
+
+- name: Get all groups
+  getent:
+    database: group
+    split: ":"
+  tags:
+    - users
+    - groups
+
+- name: Get path for Fish Shell
+  command: which fish
+  register: fish_path
+  changed_when: 0
+  tags:
+    - users
     - shell
+    - fish
+    - which
 
 - name: Setup users
   become: true
   loop: "{{ users }}"
   user:
-    name: "{{ item.username }}"
-    group: "{{ item.username }}"
+    name: "{{ item.name }}"
+    group: "{{ item.name }}"
+    shell: "{{ fish_path.stdout }}"
+    create_home: true
+  register: create_users
+  when: fish_path is succeeded
+  tags:
+    - users
+    - groups
+    - shell
+
+- name: Add additional groups to user
+  become: true
+  loop: "{{ users }}"
+  user:
+    name: "{{ item.name }}"
     groups: "{{ item.groups }}"
     append: true
-    shell: /usr/bin/fish
-    home: "{{ item.home_path }}"
-    create_home: true
-  when: create_groups is succeeded and create_user_groups is succeeded
-  register: create_users
+  when: item.groups is defined and (item.groups|length>0)
   tags:
-    - shell
+    - users
+    - groups
+
+- name: Add administrative groups to user
+  become: true
+  user:
+    name: "{{ item[0].name }}"
+    groups: "{{ item[1] }}"
+    append: true
+  when: item[0].admin is defined and item[0].admin and item[1] in ansible_facts.getent_group
+  register: became_admin
+  with_nested:
+    - "{{ users }}"
+    - "{{ admin_groups }}"
+  tags:
+    - users
+    - groups
 
 - name: "Create authorized_keys file"
   become: true
   authorized_key:
-    user: "{{ item[0].username }}"
+    user: "{{ item[0].name }}"
     state: present
     key: "{{ item[1] }}"
     exclusive: false
   with_nested:
-    - "{{ users }}"
+    - "{{ create_users.results }}"
     - "{{ ssh_public_keys }}"
   tags:
     - ssh
     - shell
 
 - name: Create Fish shell configs directory
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
   file:
-    path: "{{ item.home_path }}/.config/fish"
+    path: "{{ item.home }}/.config/fish"
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     mode: "0744"
   tags:
     - fish
     - shell
 
 - name: Copy Fish shell config
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
   copy:
     src: config.fish
-    dest: "{{ item.home_path }}/.config/fish/config.fish"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    dest: "{{ item.home }}/.config/fish/config.fish"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     mode: "0644"
   tags:
     - fish
     - shell
 
 - name: Get OMF installer
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
   get_url:
     url: "{{ omf_install_script_url }}"
     dest: "/tmp/omf_install"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     mode: "0777"
   register: omf_installer_download
   tags:
@@ -114,13 +156,13 @@
 
 - name: Copy OMF installer to each user's home directory
   become: true
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   copy:
     remote_src: true
     src: /tmp/omf_install
-    dest: "{{ item.home_path }}/install"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    dest: "{{ item.home }}/install"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     mode: 0755
   register: omf_installer_copy
   when: omf_installer_download is succeeded
@@ -130,14 +172,14 @@
     - shell
 
 - name: Install OMF
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
-  become_user: "{{ item.username }}"
+  become_user: "{{ item.name }}"
   timeout: 30
   shell: "./install --noninteractive --yes"
   args:
-    executable: /usr/bin/fish
-    chdir: "{{ item.home_path }}"
+    executable: "{{ fish_path.stdout }}"
+    chdir: "{{ item.home }}"
   register: install_omf
   when: omf_installer_copy is succeeded
   tags:
@@ -147,10 +189,10 @@
     - skip_ansible_lint # This needs to be run in the user's shell
 
 - name: Remove OMF installer
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
   file:
-    path: "{{ item.home_path }}/install"
+    path: "{{ item.home }}/install"
     state: absent
   tags:
     - fish
@@ -158,14 +200,14 @@
     - shell
 
 - name: Install BobTheFish
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
-  become_user: "{{ item.username }}"
+  become_user: "{{ item.name }}"
   timeout: 30
   shell: omf install bobthefish
   args:
-    executable: /usr/bin/fish
-    chdir: "{{ item.home_path }}"
+    executable: "{{ fish_path.stdout }}"
+    chdir: "{{ item.home }}"
   when: install_omf is succeeded
   tags:
     - fish
@@ -187,7 +229,7 @@
     single_branch: true
     version: master
     depth: 1
-  when: ultimate_vim_dir_exists is false
+  when: ultimate_vim_dir_exists.stat.exists is false
   register: clone_ultimate_vim
   tags:
     - shell
@@ -195,13 +237,13 @@
 
 - name: Copy Ultimate VIM to each user's home directory
   become: true
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   copy:
     remote_src: true
     src: "{{ ultimate_vim_tmp_path }}"
-    dest: "{{ item.home_path }}"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    dest: "{{ item.home }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     mode: 0755
   when: clone_ultimate_vim is succeeded
   tags:
@@ -209,13 +251,13 @@
     - vim
 
 - name: Install Ultimate VIM
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
-  become_user: "{{ item.username }}"
+  become_user: "{{ item.name }}"
   timeout: 30
   shell: "sh .vim_runtime/install_awesome_vimrc.sh"
   args:
-    chdir: "{{ item.home_path }}"
+    chdir: "{{ item.home }}"
   register: ultimate_vim
   when: clone_ultimate_vim is succeeded
   tags:
@@ -224,13 +266,13 @@
     - skip_ansible_lint # This needs to be run in the user's shell
 
 - name: Copy VIM my_configs
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
   copy:
     src: vim_my_configs.vim
-    dest: "{{ item.home_path }}/.vim_runtime/my_configs.vim"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    dest: "{{ item.home }}/.vim_runtime/my_configs.vim"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     mode: "0644"
   when: ultimate_vim is not skipped and ultimate_vim is succeeded
   tags:
@@ -238,12 +280,12 @@
     - shell
 
 - name: Ensure configs dir is owned by user
-  loop: "{{ users }}"
+  loop: "{{ create_users.results }}"
   become: true
   file:
-    path: "{{ item.home_path }}/.config"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    path: "{{ item.home }}/.config"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
     recurse: true
   tags:
     - fish
