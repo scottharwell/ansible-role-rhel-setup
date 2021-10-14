@@ -14,7 +14,7 @@
     - yum
     - dnf
 
-- name: Download ELEL RPM key
+- name: Download EPEL RPM key
   become: true
   ansible.builtin.rpm_key:
     state: present
