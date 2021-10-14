@@ -1,0 +1,102 @@
+---
+- name: Create Fish shell configs directory
+  loop: "{{ create_users.results }}"
+  become: true
+  file:
+    path: "{{ item.home }}/.config/fish"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: "0744"
+  tags:
+    - fish
+    - shell
+
+- name: Copy Fish shell config
+  loop: "{{ create_users.results }}"
+  become: true
+  copy:
+    src: config.fish
+    dest: "{{ item.home }}/.config/fish/config.fish"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: "0644"
+  tags:
+    - fish
+    - shell
+
+- name: Get OMF installer
+  loop: "{{ create_users.results }}"
+  become: true
+  get_url:
+    url: "{{ omf_install_script_url }}"
+    dest: "/tmp/omf_install"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: "0777"
+  register: omf_installer_download
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Copy OMF installer to each user's home directory
+  become: true
+  loop: "{{ create_users.results }}"
+  copy:
+    remote_src: true
+    src: /tmp/omf_install
+    dest: "{{ item.home }}/install"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: 0755
+  register: omf_installer_copy
+  when: omf_installer_download is succeeded
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Install OMF
+  loop: "{{ create_users.results }}"
+  become: true
+  become_user: "{{ item.name }}"
+  timeout: 30
+  shell: "./install --noninteractive --yes"
+  args:
+    executable: "{{ fish_path.stdout }}"
+    chdir: "{{ item.home }}"
+  register: install_omf
+  when: omf_installer_copy is succeeded
+  tags:
+    - fish
+    - omf
+    - shell
+    - skip_ansible_lint # This needs to be run in the user's shell
+
+- name: Remove OMF installer
+  loop: "{{ create_users.results }}"
+  become: true
+  file:
+    path: "{{ item.home }}/install"
+    state: absent
+  tags:
+    - fish
+    - omf
+    - shell
+
+- name: Install BobTheFish
+  loop: "{{ create_users.results }}"
+  become: true
+  become_user: "{{ item.name }}"
+  timeout: 30
+  shell: omf install bobthefish
+  args:
+    executable: "{{ fish_path.stdout }}"
+    chdir: "{{ item.home }}"
+  when: install_omf is succeeded
+  tags:
+    - fish
+    - omf
+    - shell
+    - skip_ansible_lint # This needs to be run in the user's shell

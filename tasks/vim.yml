@@ -1,0 +1,64 @@
+---
+- name: Check Ultimate VIM repo existence in tmp
+  become: true
+  stat:
+    path: "{{ ultimate_vim_tmp_path }}"
+  register: ultimate_vim_dir_exists
+
+- name: Clone Ultimate VIM repo to temporary directory
+  become: true
+  ansible.builtin.git:
+    repo: "{{ ultimate_vim_git_url }}"
+    dest: "{{ ultimate_vim_tmp_path }}"
+    single_branch: true
+    version: master
+    depth: 1
+  when: ultimate_vim_dir_exists.stat.exists is false
+  register: clone_ultimate_vim
+  tags:
+    - shell
+    - vim
+
+- name: Copy Ultimate VIM to each user's home directory
+  become: true
+  loop: "{{ create_users.results }}"
+  copy:
+    remote_src: true
+    src: "{{ ultimate_vim_tmp_path }}"
+    dest: "{{ item.home }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: 0755
+  when: clone_ultimate_vim is succeeded
+  tags:
+    - shell
+    - vim
+
+- name: Install Ultimate VIM
+  loop: "{{ create_users.results }}"
+  become: true
+  become_user: "{{ item.name }}"
+  timeout: 30
+  shell: "sh .vim_runtime/install_awesome_vimrc.sh"
+  args:
+    chdir: "{{ item.home }}"
+  register: ultimate_vim
+  when: clone_ultimate_vim is succeeded
+  tags:
+    - shell
+    - vim
+    - skip_ansible_lint # This needs to be run in the user's shell
+
+- name: Copy VIM my_configs
+  loop: "{{ create_users.results }}"
+  become: true
+  copy:
+    src: vim_my_configs.vim
+    dest: "{{ item.home }}/.vim_runtime/my_configs.vim"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: "0644"
+  when: ultimate_vim is not skipped and ultimate_vim is succeeded
+  tags:
+    - vim
+    - shell
