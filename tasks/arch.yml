@@ -23,6 +23,7 @@
   community.general.pacman:
     name: neofetch
     state: present
+  ignore_errors: true
 
 - name: Install iSCSI
   community.general.pacman:
