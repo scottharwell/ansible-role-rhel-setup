@@ -43,6 +43,7 @@
   dnf:
     name: "*"
     state: latest
+  ignore_errors: true
   tags:
     - yum
     - dnf
@@ -79,6 +80,7 @@
   dnf:
     name: neofetch
     state: latest
+  ignore_errors: true
   tags:
     - yum
     - dnf
