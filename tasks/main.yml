@@ -19,6 +19,10 @@
   include_tasks: bsd.yml
   when: ansible_os_family == 'FreeBSD'
 
+- name: Include macOS Tasks
+  include_tasks: darwin.yml
+  when: ansible_os_family == 'Darwin'
+
 - name: Create groups
   become: true
   loop: "{{ groups_to_create }}"
