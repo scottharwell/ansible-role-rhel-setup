@@ -1,15 +1,25 @@
 ---
-- name: Upgrade all packages
+- name: Upgrade Homebrew and install required packages
+  become: false
   community.general.homebrew:
     name:
       - fish
-      - neofetch
       - git
+      - neofetch
       - gsed
+    state: present
+    upgrade_all: true
+  tags:
+    - homebrew
+    - darwin
+- name: Install casks
+  become: false
+  community.general.homebrew:
+    name:
       - font-meslo-for-powerline
       - iterm2
     state: present
-    update_homebrew: yes
+  ignore_errors: true
   tags:
     - homebrew
     - darwin

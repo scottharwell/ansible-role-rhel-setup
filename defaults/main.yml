@@ -24,7 +24,7 @@ ssh_public_keys: []
 #  - "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
 # Location of the script to install OMF
-omf_install_script_url: "https://get.oh-my.fish"
+omf_install_script_url: "https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install"
 
 # Location of the Ultimate VIM Git repository
 ultimate_vim_git_url: "https://github.com/amix/vimrc.git"
