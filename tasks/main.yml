@@ -1,7 +1,11 @@
 ---
-- name: Print the working os family
+- name: OS family
   ansible.builtin.debug:
     msg: "{{ ansible_os_family }}"
+
+- name: OS distribution
+  ansible.builtin.debug:
+    msg: "{{ ansible_facts['distribution'] }}"
 
 - name: Include Red Hat Derivatives Tasks
   include_tasks: redhat.yml

@@ -9,7 +9,7 @@
     enabled: true
     gpgcheck: true
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8
-  when: ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "Rocky" or ansible_facts['distribution'] == "CentOS"
+  when: ansible_facts['distribution'] != "OracleLinux"
   tags:
     - yum
     - dnf
@@ -19,7 +19,7 @@
   ansible.builtin.rpm_key:
     state: present
     key: http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
-  when: ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "Rocky" or ansible_facts['distribution'] == "CentOS"
+  when: ansible_facts['distribution'] != "OracleLinux"
   tags:
     - yum
     - dnf
