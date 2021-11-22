@@ -1,5 +1,16 @@
 ---
-- name: Enable EPEL RHEL Derivatives
+
+- name: Download EPEL RPM key
+  become: true
+  ansible.builtin.rpm_key:
+    state: present
+    key: http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+  when: ansible_facts['distribution'] != "OracleLinux"
+  tags:
+    - yum
+    - dnf
+
+- name: Enable EPEL for RHEL and Clones
   become: true
   yum_repository:
     name: epel
@@ -9,16 +20,6 @@
     enabled: true
     gpgcheck: true
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8
-  when: ansible_facts['distribution'] != "OracleLinux"
-  tags:
-    - yum
-    - dnf
-
-- name: Download EPEL RPM key
-  become: true
-  ansible.builtin.rpm_key:
-    state: present
-    key: http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
   when: ansible_facts['distribution'] != "OracleLinux"
   tags:
     - yum
