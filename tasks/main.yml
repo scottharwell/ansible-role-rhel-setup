@@ -126,7 +126,7 @@
   when: config_fish
 
 - name: VIM setup tasks
-  include_tasks: fish.yml
+  include_tasks: vim.yml
   when: config_vim
 
 - name: Ensure configs dir is owned by user
