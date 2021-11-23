@@ -13,7 +13,7 @@
     single_branch: true
     version: master
     depth: 1
-  when: ultimate_vim_dir_exists.stat.exists
+  when: not ultimate_vim_dir_exists.stat.exists
   register: clone_ultimate_vim
   tags:
     - shell
