@@ -29,7 +29,8 @@
     owner: "{{ item.name }}"
     group: "{{ item.group }}"
     mode: 0755
-  when: clone_ultimate_vim is succeeded
+  when: not ultimate_vim_dir_exists.stat.exists and clone_ultimate_vim is succeeded
+  register: copy_ultimate_vim
   tags:
     - shell
     - vim
@@ -42,8 +43,8 @@
   shell: "sh .vim_runtime/install_awesome_vimrc.sh"
   args:
     chdir: "{{ item.home }}"
-  register: ultimate_vim
-  when: clone_ultimate_vim is succeeded
+  register: install_ultimate_vim
+  when: copy_ultimate_vim is succeeded
   tags:
     - shell
     - vim
@@ -58,7 +59,7 @@
     owner: "{{ item.name }}"
     group: "{{ item.group }}"
     mode: "0644"
-  when: ultimate_vim is not skipped and ultimate_vim is succeeded
+  when: install_ultimate_vim is not skipped and install_ultimate_vim is succeeded
   tags:
     - vim
     - shell
