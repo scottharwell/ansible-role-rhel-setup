@@ -1,9 +1,15 @@
 ---
+- name: Sleep for 30 seconds because zypper will run on boot with cloud init
+  wait_for:
+    timeout: 30
+  delegate_to: localhost
+
 - name: Update all packages
   zypper:
     name: '*'
     state: latest
     update_cache: yes
+  ignore_errors: true
 
 - name: Install VIM
   zypper:
