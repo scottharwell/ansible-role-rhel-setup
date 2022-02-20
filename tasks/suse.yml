@@ -1,0 +1,44 @@
+---
+- name: Update all packages
+  zypper:
+    name: '*'
+    state: latest
+    update_cache: yes
+
+- name: Install VIM
+  zypper:
+    name: vim
+    state: present
+
+- name: Install Git
+  zypper:
+    name: git
+    state: present
+
+- name: Install Fish
+  zypper:
+    name: fish
+    state: present
+
+- name: Install NeoFetch
+  zypper:
+    name: neofetch
+    state: present
+  ignore_errors: true
+
+- name: Install iSCSI
+  zypper:
+    name: open-iscsi
+    state: present
+
+- name: Allow 'wheel' group to have passwordless sudo
+  become: true
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+  when: passwordless_admin
+  tags:
+    - groups

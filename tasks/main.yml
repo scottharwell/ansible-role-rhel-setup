@@ -15,6 +15,10 @@
   include_tasks: debian.yml
   when: ansible_os_family == 'Debian'
 
+- name: Include Suse Derivatives Tasks
+  include_tasks: suse.yml
+  when: ansible_os_family == 'Suse'
+
 - name: Include Arch Derivatives Tasks
   include_tasks: arch.yml
   when: ansible_os_family == 'Archlinux'
