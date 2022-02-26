@@ -1,10 +1,12 @@
 ---
 - name: Sleep for 30 seconds because zypper will run on boot with cloud init
+  become: false
   wait_for:
     timeout: 30
   delegate_to: localhost
 
 - name: Update all packages
+  become: true
   zypper:
     name: '*'
     state: latest
@@ -12,27 +14,32 @@
   ignore_errors: true
 
 - name: Install VIM
+  become: true
   zypper:
     name: vim
     state: present
 
 - name: Install Git
+  become: true
   zypper:
     name: git
     state: present
 
 - name: Install Fish
+  become: true
   zypper:
     name: fish
     state: present
 
 - name: Install NeoFetch
+  become: true
   zypper:
     name: neofetch
     state: present
   ignore_errors: true
 
 - name: Install iSCSI
+  become: true
   zypper:
     name: open-iscsi
     state: present
