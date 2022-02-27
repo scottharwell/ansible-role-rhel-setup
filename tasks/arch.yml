@@ -1,31 +1,37 @@
 ---
 - name: Upgrade all packages
+  become: true
   community.general.pacman:
     update_cache: true
     upgrade: true
 
 - name: Install VIM
+  become: true
   community.general.pacman:
     name: vim
     state: present
 
 - name: Install Git
+  become: true
   community.general.pacman:
     name: git
     state: present
 
 - name: Install Fish
+  become: true
   community.general.pacman:
     name: fish
     state: present
 
 - name: Install NeoFetch
+  become: true
   community.general.pacman:
     name: neofetch
     state: present
   ignore_errors: true
 
 - name: Install iSCSI
+  become: true
   community.general.pacman:
     name: open-iscsi
     state: present

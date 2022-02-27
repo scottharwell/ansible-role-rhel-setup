@@ -1,44 +1,53 @@
 ---
 - name: Run the equivalent of "apt-get update" as a separate step
+  become: true
   apt:
     update_cache: true
 
 - name: Update all packages to their latest version
+  become: true
   apt:
     name: "*"
     state: latest
 
 - name: Upgrade the OS (apt-get dist-upgrade)
+  become: true
   apt:
     upgrade: dist
 
 - name: Install VIM
+  become: true
   apt:
     name: vim
     state: present
 
 - name: Install Git
+  become: true
   apt:
     name: git
     state: present
 
 - name: Install Fish
+  become: true
   apt:
     name: fish
     state: present
 
 - name: Install NeoFetch
+  become: true
   apt:
     name: neofetch
     state: present
   ignore_errors: true
 
 - name: Install iSCSI
+  become: true
   apt:
     name: open-iscsi
     state: present
 
 - name: Remove dependencies that are no longer required
+  become: true
   apt:
     autoremove: true
 
