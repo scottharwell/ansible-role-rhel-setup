@@ -10,7 +10,7 @@
   zypper:
     name: '*'
     state: latest
-    update_cache: yes
+    update_cache: true
   ignore_errors: true
 
 - name: Install VIM
