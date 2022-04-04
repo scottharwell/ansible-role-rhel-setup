@@ -62,7 +62,7 @@
 - name: Get path for Fish Shell to set as default shell for users
   command: which fish
   register: fish_path
-  changed_when: 0
+  changed_when: "0"
   tags:
     - users
     - shell
