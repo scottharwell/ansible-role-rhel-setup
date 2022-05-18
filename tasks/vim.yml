@@ -1,7 +1,7 @@
 ---
 - name: Check Ultimate VIM repo existence in tmp
   become: true
-  stat:
+  ansible.builtin.stat:
     path: "{{ ultimate_vim_tmp_path }}"
   register: ultimate_vim_dir_exists
 
