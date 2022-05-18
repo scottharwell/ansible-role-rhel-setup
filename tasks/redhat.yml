@@ -36,7 +36,7 @@
   yum_repository:
     name: oel_developer_EPEL
     description: Oracle Linux $releasever EPEL Packages for Development ($basearch)
-    baseurl: "https://yum$ociregion.$ocidomain/repo/OracleLinux/OL{{ ansible_facts['ansible_distribution_major_version'] }}/developer/EPEL/$basearch/"
+    baseurl: "https://yum$ociregion.$ocidomain/repo/OracleLinux/OL{{ ansible_facts['distribution_major_version'] }}/developer/EPEL/$basearch/"
     enabled: true
     gpgcheck: true
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
