@@ -1,13 +1,13 @@
 ---
 - name: Sleep for 30 seconds because zypper will run on boot with cloud init
   become: false
-  wait_for:
+  ansible.builtin.wait_for:
     timeout: 30
   delegate_to: localhost
 
 - name: Update all packages
   become: true
-  zypper:
+  community.general.zypper:
     name: '*'
     state: latest
     update_cache: true
@@ -15,38 +15,38 @@
 
 - name: Install VIM
   become: true
-  zypper:
+  community.general.zypper:
     name: vim
     state: present
 
 - name: Install Git
   become: true
-  zypper:
+  community.general.zypper:
     name: git
     state: present
 
 - name: Install Fish
   become: true
-  zypper:
+  community.general.zypper:
     name: fish
     state: present
 
 - name: Install NeoFetch
   become: true
-  zypper:
+  community.general.zypper:
     name: neofetch
     state: present
   ignore_errors: true
 
 - name: Install iSCSI
   become: true
-  zypper:
+  community.general.zypper:
     name: open-iscsi
     state: present
 
 - name: Allow 'wheel' group to have passwordless sudo
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/sudoers
     state: present
     regexp: "^%wheel"

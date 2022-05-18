@@ -34,7 +34,7 @@
 - name: Create groups
   become: true
   loop: "{{ groups_to_create }}"
-  group:
+  ansible.builtin.group:
     name: "{{ item }}"
     state: present
   register: create_groups
@@ -44,7 +44,7 @@
 - name: Create groups for users
   become: true
   loop: "{{ users }}"
-  group:
+  ansible.builtin.group:
     name: "{{ item.name }}"
   register: create_user_groups
   tags:
@@ -52,7 +52,7 @@
     - groups
 
 - name: Get all groups
-  getent:
+  ansible.builtin.getent:
     database: group
     split: ":"
   tags:
@@ -60,7 +60,7 @@
     - groups
 
 - name: Get path for Fish Shell to set as default shell for users
-  command: which fish
+  ansible.builtin.command: which fish
   register: fish_path
   changed_when: "0"
   tags:
@@ -72,7 +72,7 @@
 - name: Setup users
   become: true
   loop: "{{ users }}"
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     group: "{{ item.name }}"
     shell: "{{ fish_path.stdout }}"
@@ -87,7 +87,7 @@
 - name: Add additional groups to user
   become: true
   loop: "{{ users }}"
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     groups: "{{ item.groups }}"
     append: true
@@ -98,7 +98,7 @@
 
 - name: Add administrative groups to user
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ item[0].name }}"
     groups: "{{ item[1] }}"
     append: true
@@ -136,7 +136,7 @@
 - name: Ensure configs dir is owned by user
   loop: "{{ create_users.results }}"
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ item.home }}/.config"
     owner: "{{ item.name }}"
     group: "{{ item.group }}"

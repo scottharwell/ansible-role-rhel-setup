@@ -22,7 +22,7 @@
 - name: Copy Ultimate VIM to each user's home directory
   become: true
   loop: "{{ create_users.results }}"
-  copy:
+  ansible.builtin.copy:
     remote_src: true
     src: "{{ ultimate_vim_tmp_path }}"
     dest: "{{ item.home }}"
@@ -40,7 +40,7 @@
   become: true
   become_user: "{{ item.name }}"
   timeout: 30
-  shell: "sh .vim_runtime/install_awesome_vimrc.sh"
+  ansible.builtin.shell: "sh .vim_runtime/install_awesome_vimrc.sh"
   args:
     chdir: "{{ item.home }}"
   register: install_ultimate_vim
@@ -53,7 +53,7 @@
 - name: Copy VIM my_configs
   loop: "{{ create_users.results }}"
   become: true
-  copy:
+  ansible.builtin.copy:
     src: vim_my_configs.vim
     dest: "{{ item.home }}/.vim_runtime/my_configs.vim"
     owner: "{{ item.name }}"

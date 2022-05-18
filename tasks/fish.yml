@@ -2,7 +2,7 @@
 - name: Create Fish shell configs directory
   loop: "{{ create_users.results }}"
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ item.home }}/.config/fish"
     state: directory
     owner: "{{ item.name }}"
@@ -15,7 +15,7 @@
 - name: Copy Fish shell config
   loop: "{{ create_users.results }}"
   become: true
-  copy:
+  ansible.builtin.copy:
     src: config.fish
     dest: "{{ item.home }}/.config/fish/config.fish"
     owner: "{{ item.name }}"
@@ -28,7 +28,7 @@
 - name: Get OMF installer
   loop: "{{ create_users.results }}"
   become: true
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ omf_install_script_url }}"
     dest: "/tmp/omf_install"
     owner: "{{ item.name }}"
@@ -43,7 +43,7 @@
 - name: Copy OMF installer to each user's home directory
   become: true
   loop: "{{ create_users.results }}"
-  copy:
+  ansible.builtin.copy:
     remote_src: true
     src: /tmp/omf_install
     dest: "{{ item.home }}/install"
@@ -62,7 +62,7 @@
   become: true
   become_user: "{{ item.name }}"
   timeout: 30
-  shell: "./install --noninteractive --yes"
+  ansible.builtin.shell: "./install --noninteractive --yes"
   args:
     executable: "{{ fish_path.stdout }}"
     chdir: "{{ item.home }}"
@@ -77,7 +77,7 @@
 - name: Remove OMF installer
   loop: "{{ create_users.results }}"
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ item.home }}/install"
     state: absent
   tags:
@@ -90,7 +90,7 @@
   become: true
   become_user: "{{ item.name }}"
   timeout: 30
-  shell: omf install bobthefish
+  ansible.builtin.shell: omf install bobthefish
   args:
     executable: "{{ fish_path.stdout }}"
     chdir: "{{ item.home }}"

@@ -18,7 +18,7 @@
 
 - name: Enable EPEL for RHEL and RHEL clones
   become: true
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: epel
     description: Extra Packages for Enterprise Linux $releasever - $basearch
     baseurl: https://download.fedoraproject.org/pub/epel/$releasever/Everything/$basearch
@@ -33,7 +33,7 @@
 
 - name: Enable EPEL Repo Oracle Linux
   become: true
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: oel_developer_EPEL
     description: Oracle Linux $releasever EPEL Packages for Development ($basearch)
     baseurl: "https://yum$ociregion.$ocidomain/repo/OracleLinux/OL{{ ansible_facts['distribution_major_version'] }}/developer/EPEL/$basearch/"
@@ -47,7 +47,7 @@
 
 - name: Upgrade all packages
   become: true
-  dnf:
+  ansible.builtin.dnf:
     name: "*"
     state: latest
   ignore_errors: true
@@ -57,7 +57,7 @@
 
 - name: Install VIM
   become: true
-  dnf:
+  ansible.builtin.dnf:
     name: vim
     state: latest
   tags:
@@ -66,7 +66,7 @@
 
 - name: Install Git
   become: true
-  dnf:
+  ansible.builtin.dnf:
     name: git
     state: latest
   tags:
@@ -75,7 +75,7 @@
 
 - name: Install Fish
   become: true
-  dnf:
+  ansible.builtin.dnf:
     name: fish
     state: latest
   tags:
@@ -84,7 +84,7 @@
 
 - name: Install NeoFetch
   become: true
-  dnf:
+  ansible.builtin.dnf:
     name: neofetch
     state: latest
   ignore_errors: true
@@ -94,7 +94,7 @@
 
 - name: Install iSCSI
   become: true
-  dnf:
+  ansible.builtin.dnf:
     name: iscsi-initiator-utils
     state: latest
   tags:
@@ -103,7 +103,7 @@
 
 - name: Allow 'wheel' group to have passwordless sudo
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/sudoers
     state: present
     regexp: "^%wheel"
