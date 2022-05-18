@@ -2,9 +2,7 @@
 extends: default
 
 rules:
-  line-length:
-    max: 200
-    level: warning
+  line-length: disable
   comments:
     require-starting-space: true
     ignore-shebangs: true
