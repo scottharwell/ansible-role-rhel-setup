@@ -4,13 +4,13 @@
   become: false
   ansible.builtin.fail:
     msg: The RHEL (derivative) version must be version 8 or higher
-  when: ansible_facts['ansible_distribution_major_version'] < 8
+  when: ansible_facts['distribution_major_version'] < 8
 
 - name: Download EPEL RPM key
   become: true
   ansible.builtin.rpm_key:
     state: present
-    key: "http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['ansible_distribution_major_version'] }}"
+    key: "http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
   when: ansible_facts['distribution'] != "OracleLinux"
   tags:
     - yum
@@ -25,7 +25,7 @@
     metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir
     enabled: true
     gpgcheck: true
-    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_facts['ansible_distribution_major_version'] }}"
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
   when: ansible_facts['distribution'] != "OracleLinux"
   tags:
     - yum
