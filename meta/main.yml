@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   role_name: server_setup
+  namespace: scottharwell
   author: Scott Harwell
   description: Sets up servers with Fish shell, Fish shell themes, VIM configuration, and a NeoFetch display at login.
   license: MIT

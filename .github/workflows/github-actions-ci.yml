@@ -10,8 +10,10 @@ name: CI
 jobs:
   yaml-lint:
     runs-on: ubuntu-latest
+
     container:
       image: cytopia/yamllint
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -20,12 +22,13 @@ jobs:
 
   ansible-role-tests:
     runs-on: ubuntu-latest
-    container:
-      image: ansible/ansible-runner
+
     steps:
+      - name: Install Ansible
+        run: pip3 install ansible ansible-runner ansible-navigator
+
       - name: Check out repository code
         uses: actions/checkout@v2
-      - name: Check Ansible version
-        run: ansible --version
+
       - name: Run test playbook
-        run: ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+        run: ansible-lint ./
