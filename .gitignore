@@ -2,3 +2,6 @@
 */__pycache__
 *.pyc
 .cache
+*.log
+tests/test.yml
+tests/inventory
