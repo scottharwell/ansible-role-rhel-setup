@@ -1,5 +1,4 @@
 ---
-
 - name: Fail if major version is less than 8
   become: false
   ansible.builtin.fail:
@@ -11,7 +10,9 @@
   ansible.builtin.rpm_key:
     state: present
     key: "http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
-  when: ansible_facts['distribution'] != "OracleLinux" and ansible_facts['distribution'] != "Fedora"
+  when:
+    - ansible_facts['distribution'] != "OracleLinux"
+    - ansible_facts['distribution'] != "Fedora"
   tags:
     - yum
     - dnf
@@ -26,12 +27,14 @@
     enabled: true
     gpgcheck: true
     gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
-  when: ansible_facts['distribution'] != "OracleLinux" and ansible_facts['distribution'] != "Fedora"
+  when:
+    - ansible_facts['distribution'] != "OracleLinux"
+    - ansible_facts['distribution'] != "Fedora"
   tags:
     - yum
     - dnf
 
-- name: Enable EPEL Repo Oracle Linux
+- name: Enable EPEL Repo Oracle Linux 8
   become: true
   ansible.builtin.yum_repository:
     name: oel_developer_EPEL
@@ -40,7 +43,9 @@
     enabled: true
     gpgcheck: true
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-  when: ansible_facts['distribution'] == "OracleLinux"
+  when:
+    - ansible_facts['distribution'] == "OracleLinux"
+    - ansible_facts['distribution_major_version'] == 8
   tags:
     - yum
     - dnf

@@ -8,27 +8,27 @@
     msg: "{{ ansible_facts['distribution'] }}"
 
 - name: Include Red Hat Derivatives Tasks
-  include_tasks: redhat.yml
+  ansible.builtin.include_tasks: redhat.yml
   when: ansible_os_family == 'RedHat'
 
 - name: Include Debian Derivatives Tasks
-  include_tasks: debian.yml
+  ansible.builtin.include_tasks: debian.yml
   when: ansible_os_family == 'Debian'
 
 - name: Include Suse Derivatives Tasks
-  include_tasks: suse.yml
+  ansible.builtin.include_tasks: suse.yml
   when: ansible_os_family == 'Suse'
 
 - name: Include Arch Derivatives Tasks
-  include_tasks: arch.yml
+  ansible.builtin.include_tasks: arch.yml
   when: ansible_os_family == 'Archlinux'
 
 - name: Include FreeBSD Derivatives Tasks
-  include_tasks: bsd.yml
+  ansible.builtin.include_tasks: bsd.yml
   when: ansible_os_family == 'FreeBSD'
 
 - name: Include macOS Tasks
-  include_tasks: darwin.yml
+  ansible.builtin.include_tasks: darwin.yml
   when: ansible_os_family == 'Darwin'
 
 - name: Create groups
@@ -126,11 +126,11 @@
     - shell
 
 - name: Fish Shell setup tasks
-  include_tasks: fish.yml
+  ansible.builtin.include_tasks: fish.yml
   when: config_fish
 
 - name: VIM setup tasks
-  include_tasks: vim.yml
+  ansible.builtin.include_tasks: vim.yml
   when: config_vim
 
 - name: Ensure configs dir is owned by user
