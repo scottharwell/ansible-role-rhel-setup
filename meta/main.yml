@@ -25,6 +25,7 @@ galaxy_info:
         - "34"
         - "35"
         - "36"
+        - "37"
     - name: Ubuntu
       versions:
         - bionic
@@ -35,7 +36,3 @@ galaxy_info:
     - development
     - configuration
     - shell
-
-  dependencies:
-    - ansible.posix
-    - community.general
